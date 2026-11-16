@@ -1,113 +1,278 @@
 (() => {
   'use strict';
+
   const THEME_KEY = 'albion-workshop-theme-v1';
+  const palettes = ['modern-minimalist', 'albion-inspired', 'soft-comfortable', 'maroon-elegance', 'forest-harmony', 'mocha-serenity'];
+  const modes = ['light', 'dark', 'system'];
   const paletteSelect = document.querySelector('#palette-select');
   const modeSelect = document.querySelector('#mode-select');
   const body = document.body;
-  const palettes = ['modern-minimalist', 'albion-inspired', 'soft-comfortable', 'maroon-elegance', 'forest-harmony', 'mocha-serenity'];
-  const modes = ['light', 'dark', 'system'];
+
   function loadTheme() {
     try {
       const saved = JSON.parse(localStorage.getItem(THEME_KEY) || '{}');
-      return { palette: palettes.includes(saved.palette) ? saved.palette : 'modern-minimalist', mode: modes.includes(saved.mode) ? saved.mode : 'system' };
-    } catch { return { palette: 'modern-minimalist', mode: 'system' }; }
+      return {
+        palette: palettes.includes(saved.palette) ? saved.palette : 'modern-minimalist',
+        mode: modes.includes(saved.mode) ? saved.mode : 'system'
+      };
+    } catch {
+      return { palette: 'modern-minimalist', mode: 'system' };
+    }
   }
+
   function applyTheme(theme) {
     body.dataset.palette = theme.palette;
     body.dataset.mode = theme.mode;
-    paletteSelect.value = theme.palette;
-    modeSelect.value = theme.mode;
-    try { localStorage.setItem(THEME_KEY, JSON.stringify(theme)); } catch { /* Continue without persistence if storage is unavailable. */ }
+    if (paletteSelect) paletteSelect.value = theme.palette;
+    if (modeSelect) modeSelect.value = theme.mode;
+    try {
+      localStorage.setItem(THEME_KEY, JSON.stringify(theme));
+    } catch {
+      // storage may be blocked; continue gracefully
+    }
   }
+
   applyTheme(loadTheme());
   paletteSelect.addEventListener('change', () => applyTheme({ palette: paletteSelect.value, mode: modeSelect.value }));
   modeSelect.addEventListener('change', () => applyTheme({ palette: paletteSelect.value, mode: modeSelect.value }));
 
-  const materialsList = document.querySelector('#materials-list');
-  let materialId = 0;
-  let latestSummary = '';
-  const money = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
-  const quantityFormat = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 });
-  function addMaterialRow(defaults = {}) {
-    const id = ++materialId;
-    const row = document.createElement('fieldset');
-    row.className = 'materials-row';
-    row.innerHTML = `<legend class="visually-hidden">Bahan resep ${id}</legend>
-      <div class="field"><label for="material-name-${id}">Nama bahan</label><input id="material-name-${id}" class="material-name" type="text" placeholder="Nama bahan" autocomplete="off"></div>
-      <div class="field"><label for="material-quantity-${id}">Jumlah / batch</label><input id="material-quantity-${id}" class="material-quantity" type="number" min="0" step="any" value="0" inputmode="decimal"></div>
-      <div class="field"><label for="material-price-${id}">Harga / unit</label><input id="material-price-${id}" class="material-price" type="number" min="0" step="any" value="0" inputmode="decimal"></div>
-      <label class="returnable-control" for="material-returnable-${id}"><input id="material-returnable-${id}" class="material-returnable" type="checkbox" checked><span>Dapat return</span></label>
-      <button class="remove-material" type="button" aria-label="Hapus bahan ${id}" title="Hapus bahan">Hapus</button>`;
-    row.querySelector('.material-name').value = defaults.name || '';
-    row.querySelector('.material-quantity').value = defaults.quantity ?? 0;
-    row.querySelector('.material-price').value = defaults.price ?? 0;
-    row.querySelector('.material-returnable').checked = defaults.returnable !== false;
-    row.querySelector('.remove-material').addEventListener('click', () => {
-      row.remove();
-      invalidateResults();
-    });
-    materialsList.append(row);
-  }
-  function resetResult(message = 'Isi bahan resep, harga, dan biaya, lalu pilih Hitung estimasi.') {
-    const empty = document.querySelector('#empty-state');
-    empty.textContent = message;
-    empty.hidden = false;
-    document.querySelector('#results').hidden = true;
-    document.querySelector('#copy-results').disabled = true;
-    document.querySelector('#copy-status').textContent = '';
-    latestSummary = '';
-  }
-  function invalidateResults() {
-    if (!document.querySelector('#results').hidden) {
-      resetResult('Input berubah. Hitung ulang untuk melihat hasil terbaru.');
-    }
-  }
-  function resetMaterialRows() {
-    materialsList.replaceChildren();
-    materialId = 0;
-    addMaterialRow();
-  }
-  document.querySelector('#add-material').addEventListener('click', () => {
-    addMaterialRow();
-    invalidateResults();
-  });
-  document.querySelector('#reset-calculator').addEventListener('click', () => {
-    window.setTimeout(() => {
-      resetMaterialRows();
-      resetResult();
-      document.querySelector('#validation-message').hidden = true;
-    }, 0);
-  });
-  resetMaterialRows();
+  const MATERIAL_ROW_TEMPLATE = `
+    <div class="field">
+      <label>Nama bahan</label>
+      <input class="material-name" type="text" placeholder="Nama bahan" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Jumlah / batch</label>
+      <input class="material-quantity" type="number" min="0" step="any" value="0" inputmode="decimal">
+    </div>
+    <div class="field">
+      <label>Harga / unit</label>
+      <input class="material-price" type="number" min="0" step="any" value="0" inputmode="decimal">
+    </div>
+    <label class="returnable-control"><input class="material-returnable" type="checkbox" checked><span>Dapat return</span></label>
+    <button class="remove-material" type="button" aria-label="Hapus bahan">Hapus</button>
+  `;
 
   const form = document.querySelector('#calculator-form');
+  const materialsList = document.querySelector('#materials-list');
   const validation = document.querySelector('#validation-message');
-  const setText = (selector, value) => { document.querySelector(selector).textContent = value; };
-  // Avoid showing stale profit if any calculator input changes after a calculation.
-  form.addEventListener('input', invalidateResults);
-  form.addEventListener('change', invalidateResults);
+  const resultPanel = document.querySelector('#results');
+  const emptyState = document.querySelector('#empty-state');
+  const copyButton = document.querySelector('#copy-results');
+  const copyStatus = document.querySelector('#copy-status');
+  const money = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
+  const quantity = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 });
+  let materialId = 0;
+  let latestSummary = '';
+
+  function setValidation(message) {
+    if (!message) {
+      validation.hidden = true;
+      validation.textContent = '';
+      return;
+    }
+    validation.hidden = false;
+    validation.textContent = message;
+  }
+
+  function resetResult(message = 'Isi bahan resep, harga, dan biaya, lalu pilih Hitung estimasi.') {
+    emptyState.textContent = message;
+    emptyState.hidden = false;
+    resultPanel.hidden = true;
+    copyButton.disabled = true;
+    copyStatus.textContent = '';
+    latestSummary = '';
+  }
+
+  function applyPreset(presetName) {
+    const presets = {
+      starter: {
+        itemName: 'Hasil refining',
+        city: 'Martlock',
+        outputQuantity: 1,
+        batches: 10,
+        returnRate: 25,
+        returnModel: 'expected',
+        outputPrice: 1600,
+        stationFee: 120,
+        marketTax: 2,
+        sellOrderFee: 1,
+        focusPoints: 0,
+        focusValue: 0,
+        materials: [
+          { name: 'Ore', quantity: 12, price: 120, returnable: true },
+          { name: 'Stone', quantity: 8, price: 90, returnable: true },
+          { name: 'T2 material', quantity: 4, price: 210, returnable: false }
+        ]
+      },
+      'refining-heavy': {
+        process: 'refining',
+        itemName: 'Refined Batch',
+        city: 'Fort Sterling',
+        outputQuantity: 1,
+        batches: 25,
+        returnRate: 35,
+        returnModel: 'expected',
+        outputPrice: 2100,
+        stationFee: 220,
+        marketTax: 2.5,
+        sellOrderFee: 1,
+        focusPoints: 25,
+        focusValue: 12,
+        materials: [
+          { name: 'Ore', quantity: 18, price: 150, returnable: true },
+          { name: 'Stone', quantity: 12, price: 110, returnable: true },
+          { name: 'Wood', quantity: 7, price: 95, returnable: true }
+        ]
+      },
+      'crafting-economy': {
+        process: 'crafting',
+        itemName: 'Crafted Set',
+        city: 'Bridgewatch',
+        outputQuantity: 2,
+        batches: 8,
+        returnRate: 30,
+        returnModel: 'expected',
+        outputPrice: 2800,
+        stationFee: 180,
+        marketTax: 2,
+        sellOrderFee: 1.5,
+        focusPoints: 15,
+        focusValue: 10,
+        materials: [
+          { name: 'Hide', quantity: 16, price: 130, returnable: true },
+          { name: 'Fiber', quantity: 10, price: 98, returnable: true },
+          { name: 'Crafting reagent', quantity: 5, price: 220, returnable: false }
+        ]
+      }
+    };
+
+    const preset = presets[presetName];
+    if (!preset) return;
+
+    const processRadio = form.querySelector(`input[name="process"][value="${preset.process || 'refining'}"]`);
+    if (processRadio) processRadio.checked = true;
+
+    form.elements.itemName.value = preset.itemName || '';
+    form.elements.city.value = preset.city || '';
+    form.elements.outputQuantity.value = preset.outputQuantity ?? 1;
+    form.elements.batches.value = preset.batches ?? 1;
+    form.elements.returnRate.value = preset.returnRate ?? 0;
+    form.elements.returnModel.value = preset.returnModel || 'expected';
+    form.elements.outputPrice.value = preset.outputPrice ?? 0;
+    form.elements.stationFee.value = preset.stationFee ?? 0;
+    form.elements.marketTax.value = preset.marketTax ?? 0;
+    form.elements.sellOrderFee.value = preset.sellOrderFee ?? 0;
+    form.elements.focusPoints.value = preset.focusPoints ?? 0;
+    form.elements.focusValue.value = preset.focusValue ?? 0;
+
+    materialsList.replaceChildren();
+    materialId = 0;
+    (preset.materials || []).forEach((material) => addMaterialRow(material));
+    if (!preset.materials || preset.materials.length === 0) addMaterialRow();
+    setValidation('');
+    resetResult('Preset masuk. Hitung ulang untuk memperbarui estimasi.');
+  }
+
+  function addMaterialRow(defaults = {}) {
+    const id = ++materialId;
+    const row = document.createElement('div');
+    row.className = 'materials-row';
+    row.innerHTML = MATERIAL_ROW_TEMPLATE;
+    const nameInput = row.querySelector('.material-name');
+    const quantityInput = row.querySelector('.material-quantity');
+    const priceInput = row.querySelector('.material-price');
+    const returnInput = row.querySelector('.material-returnable');
+    const removeButton = row.querySelector('.remove-material');
+
+    nameInput.value = defaults.name || '';
+    quantityInput.value = defaults.quantity ?? 0;
+    priceInput.value = defaults.price ?? 0;
+    returnInput.checked = defaults.returnable !== false;
+
+    removeButton.addEventListener('click', () => {
+      row.remove();
+      setValidation('');
+      if (!materialsList.querySelectorAll('.materials-row').length) {
+        resetResult('Minimal ada satu bahan. Tambahkan bahan untuk menghitung estimasi.');
+      }
+    });
+
+    materialsList.append(row);
+  }
+
+  function resetCalculator() {
+    form.reset();
+    form.elements.process.value = 'refining';
+    form.elements.outputQuantity.value = 1;
+    form.elements.batches.value = 1;
+    form.elements.returnRate.value = 25;
+    form.elements.returnModel.value = 'expected';
+    form.elements.outputPrice.value = 0;
+    form.elements.stationFee.value = 0;
+    form.elements.marketTax.value = 0;
+    form.elements.sellOrderFee.value = 0;
+    form.elements.focusPoints.value = 0;
+    form.elements.focusValue.value = 0;
+    materialsList.replaceChildren();
+    materialId = 0;
+    addMaterialRow({ name: 'Ore', quantity: 10, price: 100, returnable: true });
+    addMaterialRow({ name: 'Stone', quantity: 8, price: 80, returnable: true });
+    setValidation('');
+    resetResult();
+  }
+
+  document.querySelector('#add-material').addEventListener('click', () => {
+    addMaterialRow();
+    setValidation('');
+    if (resultPanel.hidden === false) {
+      resetResult('Input berubah. Hitung ulang untuk melihat hasil terbaru.');
+    }
+  });
+
+  document.querySelector('#reset-calculator').addEventListener('click', resetCalculator);
+  document.querySelectorAll('[data-preset-apply]').forEach(button => {
+    button.addEventListener('click', () => applyPreset('starter'));
+  });
+  document.querySelectorAll('[data-preset]').forEach(button => {
+    button.addEventListener('click', () => applyPreset(button.dataset.preset));
+  });
+
+  form.addEventListener('input', () => {
+    if (!resultPanel.hidden) {
+      resetResult('Input berubah. Hitung ulang untuk melihat hasil terbaru.');
+    }
+  });
+  form.addEventListener('change', () => {
+    if (!resultPanel.hidden) {
+      resetResult('Input berubah. Hitung ulang untuk melihat hasil terbaru.');
+    }
+  });
+
   form.addEventListener('submit', event => {
     event.preventDefault();
-    validation.hidden = true;
+    setValidation('');
     if (!form.reportValidity()) return;
+
     const rows = [...materialsList.querySelectorAll('.materials-row')];
     const materials = rows.map(row => ({
-      name: row.querySelector('.material-name').value.trim(),
-      quantityPerBatch: Number(row.querySelector('.material-quantity').value),
-      unitPrice: Number(row.querySelector('.material-price').value),
+      name: row.querySelector('.material-name').value.trim() || 'Bahan',
+      quantityPerBatch: Number(row.querySelector('.material-quantity').value || 0),
+      unitPrice: Number(row.querySelector('.material-price').value || 0),
       returnable: row.querySelector('.material-returnable').checked
     }));
+
     if (!materials.some(material => material.quantityPerBatch > 0)) {
-      validation.textContent = 'Tambahkan minimal satu bahan dengan jumlah per batch lebih dari 0.';
-      validation.hidden = false;
+      setValidation('Tambahkan minimal satu bahan dengan jumlah per batch lebih dari 0.');
       rows[0]?.querySelector('.material-quantity').focus();
       return;
     }
+
     const process = form.querySelector('input[name="process"]:checked').value;
     const itemName = form.elements.itemName.value.trim() || (process === 'refining' ? 'Hasil refining' : 'Hasil crafting');
-    let result;
+
     try {
-      result = AlbionCalculator.calculate({
+      const result = AlbionCalculator.calculate({
         outputPerBatch: Number(form.elements.outputQuantity.value),
         batches: Number(form.elements.batches.value),
         returnRatePercent: Number(form.elements.returnRate.value),
@@ -120,53 +285,62 @@
         sellOrderFeePercent: Number(form.elements.sellOrderFee.value || 0),
         materials
       });
+
+      resultPanel.hidden = false;
+      emptyState.hidden = true;
+      copyButton.disabled = false;
+
+      document.querySelector('#result-item-name').textContent = `${itemName} · ${form.elements.city.value.trim() || 'Kota belum dipilih'}`;
+      document.querySelector('#result-quantity').textContent = quantity.format(result.totalOutput);
+      document.querySelector('#result-gross-material').textContent = `${money.format(result.grossMaterialValue)} silver`;
+      document.querySelector('#result-returned-material').textContent = `${money.format(result.returnedMaterialValue)} silver`;
+      document.querySelector('#result-material-cost').textContent = `${money.format(result.materialCost)} silver`;
+      document.querySelector('#result-station-cost').textContent = `${money.format(result.stationCost)} silver`;
+      document.querySelector('#result-focus-cost').textContent = `${money.format(result.focusCost)} silver`;
+      document.querySelector('#result-gross-revenue').textContent = `${money.format(result.grossRevenue)} silver`;
+      document.querySelector('#result-market-tax').textContent = `${money.format(result.marketTax)} silver`;
+      document.querySelector('#result-sell-fee').textContent = `${money.format(result.sellOrderFee)} silver`;
+      document.querySelector('#result-revenue').textContent = `${money.format(result.netRevenue)} silver`;
+      const profitBox = document.querySelector('#result-profit');
+      profitBox.textContent = `${result.profit < 0 ? '−' : ''}${money.format(Math.abs(result.profit))} silver`;
+      profitBox.classList.toggle('negative', result.profit < 0);
+
+      const marginText = result.netRevenue === 0 ? 'Margin belum tersedia — pendapatan bersih 0.' : `${((result.profit / result.netRevenue) * 100).toFixed(2)}%`;
+      const roiText = result.totalProductionCost === 0 ? 'ROI belum tersedia — biaya produksi 0.' : `${((result.profit / result.totalProductionCost) * 100).toFixed(2)}%`;
+      document.querySelector('#result-margin').textContent = `Margin: ${marginText} · ROI biaya produksi: ${roiText}`;
+
+      const rowsResult = document.querySelector('#result-material-rows');
+      rowsResult.replaceChildren();
+      result.materialDetails.forEach(item => {
+        const tr = document.createElement('tr');
+        [item.name, quantity.format(item.grossQuantity), quantity.format(item.returnedQuantity), quantity.format(item.consumedQuantity), `${money.format(item.consumedValue)} silver`].forEach(value => {
+          const td = document.createElement('td');
+          td.textContent = value;
+          tr.append(td);
+        });
+        rowsResult.append(tr);
+      });
+
+      const modelNote = result.returnModel === 'floor-batch' ? 'simulasi floor per bahan per batch' : 'ekspektasi pecahan';
+      document.querySelector('#formula-note').textContent = `RRR ${money.format(result.returnRatePercent)}% · model ${modelNote}. Bahan non-returnable tidak menerima pengembalian. Biaya bahan = bahan kotor − bahan kembali. Pendapatan bersih = pendapatan kotor − pajak − biaya sell order.`;
+
+      latestSummary = `${itemName} (${process}) — ${form.elements.city.value.trim() || 'Kota belum dipilih'}\nJumlah hasil: ${quantity.format(result.totalOutput)}\nNilai bahan kotor: ${money.format(result.grossMaterialValue)} silver\nNilai bahan kembali: ${money.format(result.returnedMaterialValue)} silver\nBiaya bahan: ${money.format(result.materialCost)} silver\nBiaya stasiun: ${money.format(result.stationCost)} silver\nBiaya fokus: ${money.format(result.focusCost)} silver\nPendapatan bersih: ${money.format(result.netRevenue)} silver\nProfit: ${money.format(result.profit)} silver\nRRR: ${money.format(result.returnRatePercent)}% (${modelNote})`;
+      copyStatus.textContent = '';
     } catch (error) {
-      validation.textContent = error.message;
-      validation.hidden = false;
-      return;
+      setValidation(error.message || 'Ada kesalahan perhitungan.');
+      resultPanel.hidden = false;
+      emptyState.hidden = true;
     }
-    const city = form.elements.city.value || 'Kota belum dipilih';
-    document.querySelector('#empty-state').hidden = true;
-    document.querySelector('#results').hidden = false;
-    setText('#result-item-name', `${itemName} · ${city}`);
-    setText('#result-quantity', quantityFormat.format(result.totalOutput));
-    setText('#result-gross-material', `${money.format(result.grossMaterialValue)} silver · ${quantityFormat.format(result.grossMaterialQuantity)} unit`);
-    setText('#result-returned-material', `${money.format(result.returnedMaterialValue)} silver · ${quantityFormat.format(result.returnedMaterialQuantity)} unit`);
-    setText('#result-material-cost', `${money.format(result.materialCost)} silver`);
-    setText('#result-station-cost', `${money.format(result.stationCost)} silver`);
-    setText('#result-focus-cost', `${money.format(result.focusCost)} silver`);
-    setText('#result-gross-revenue', `${money.format(result.grossRevenue)} silver`);
-    setText('#result-market-tax', `${money.format(result.marketTax)} silver`);
-    setText('#result-sell-fee', `${money.format(result.sellOrderFee)} silver`);
-    setText('#result-revenue', `${money.format(result.netRevenue)} silver`);
-    const profitElement = document.querySelector('#result-profit');
-    profitElement.textContent = `${result.profit < 0 ? '−' : ''}${money.format(Math.abs(result.profit))} silver`;
-    profitElement.classList.toggle('negative', result.profit < 0);
-    setText('#result-margin', `Margin estimasi: ${result.netRevenue === 0 ? '—' : `${(result.profit / result.netRevenue * 100).toFixed(2)}%`} · ROI biaya produksi: ${result.totalProductionCost === 0 ? '—' : `${(result.profit / result.totalProductionCost * 100).toFixed(2)}%`}`);
-    const bodyRows = document.querySelector('#result-material-rows');
-    bodyRows.replaceChildren();
-    for (const material of result.materialDetails) {
-      const tr = document.createElement('tr');
-      for (const value of [material.name, quantityFormat.format(material.grossQuantity), quantityFormat.format(material.returnedQuantity), quantityFormat.format(material.consumedQuantity), `${money.format(material.consumedValue)} silver`]) {
-        const td = document.createElement('td');
-        td.textContent = value;
-        tr.append(td);
-      }
-      bodyRows.append(tr);
-    }
-    const modelDescription = result.returnModel === 'floor-batch' ? 'simulasi floor per bahan per batch' : 'ekspektasi pecahan (rata-rata teoritis)';
-    const note = `RRR input ${money.format(result.returnRatePercent)}%; model ${modelDescription}. Bahan non-returnable tidak menerima return. Biaya material = nilai bahan awal − nilai bahan kembali; pendapatan bersih = kotor − pajak − biaya sell order. Produksi = bahan dikonsumsi + stasiun + biaya peluang fokus. Pembulatan pajak/fee game tidak dimodelkan; verifikasi biaya dan return dalam game.`;
-    setText('#formula-note', note);
-    latestSummary = `${itemName} (${process}) — ${city}\nHasil: ${quantityFormat.format(result.totalOutput)}\nBahan kotor: ${money.format(result.grossMaterialValue)} silver\nNilai bahan kembali: ${money.format(result.returnedMaterialValue)} silver\nBiaya bahan dikonsumsi: ${money.format(result.materialCost)} silver\nBiaya stasiun: ${money.format(result.stationCost)} silver\nBiaya fokus: ${money.format(result.focusCost)} silver\nPendapatan bersih: ${money.format(result.netRevenue)} silver\nProfit estimasi: ${money.format(result.profit)} silver\nRRR: ${money.format(result.returnRatePercent)}% (${modelDescription})`;
-    document.querySelector('#copy-results').disabled = false;
   });
-  document.querySelector('#copy-results').addEventListener('click', async () => {
-    const status = document.querySelector('#copy-status');
+
+  copyButton.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(latestSummary);
-      status.textContent = 'Ringkasan tersalin ke clipboard.';
+      copyStatus.textContent = 'Ringkasan berhasil disalin.';
     } catch {
-      status.textContent = 'Clipboard tidak tersedia di browser ini. Pilih teks hasil dan salin secara manual.';
+      copyStatus.textContent = 'Clipboard tidak tersedia; salin ringkasan secara manual.';
     }
   });
+
+  resetCalculator();
 })();

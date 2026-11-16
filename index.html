@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f7f9">
-  <meta name="description" content="Kalkulator crafting dan refining Albion Online gratis dengan harga manual, perhitungan transparan, dan tema yang bisa disesuaikan.">
+  <meta name="description" content="Kalkulator crafting dan refining Albion Online manual, transparan, dan mudah dibaca.">
   <title>Albion Workshop — Crafting & Refining Calculator</title>
   <link rel="stylesheet" href="styles.css">
   <script src="calculator.js" defer></script>
@@ -12,49 +12,292 @@
 </head>
 <body data-palette="modern-minimalist" data-mode="system">
   <a class="skip-link" href="#main">Lewati ke konten utama</a>
+
   <header class="topbar">
-    <a class="brand" href="#home" aria-label="Albion Workshop beranda"><span class="brand-mark" aria-hidden="true">A</span><span>Albion <strong>Workshop</strong></span></a>
-    <nav class="top-nav" aria-label="Navigasi utama"><a href="#calculator">Kalkulator</a><a href="#city-bonuses">Bonus kota</a><a href="#about">Tentang</a></nav>
-    <details class="theme-menu"><summary aria-label="Pengaturan tampilan">Tampilan</summary><div class="theme-controls"><label for="palette-select">Palet warna</label><select id="palette-select"><option value="modern-minimalist">Modern Minimalist</option><option value="albion-inspired">Albion Inspired</option><option value="soft-comfortable">Soft &amp; Comfortable</option><option value="maroon-elegance">Maroon Elegance</option><option value="forest-harmony">Forest Harmony</option><option value="mocha-serenity">Mocha Serenity</option></select><label for="mode-select">Mode tampilan</label><select id="mode-select"><option value="light">Light</option><option value="dark">Dark</option><option value="system">System</option></select></div></details>
+    <a class="brand" href="#home" aria-label="Albion Workshop beranda">
+      <span class="brand-mark" aria-hidden="true">A</span>
+      <span>Albion <strong>Workshop</strong></span>
+    </a>
+
+    <nav class="top-nav" aria-label="Navigasi utama">
+      <a href="#calculator">Kalkulator</a>
+      <a href="#city-bonuses">Bonus kota</a>
+      <a href="#about">Tentang</a>
+    </nav>
+
+    <details class="theme-menu">
+      <summary aria-label="Pengaturan tampilan">Tampilan</summary>
+      <div class="theme-controls">
+        <label for="palette-select">Palet warna</label>
+        <select id="palette-select">
+          <option value="modern-minimalist">Modern Minimalist</option>
+          <option value="albion-inspired">Albion Inspired</option>
+          <option value="soft-comfortable">Soft &amp; Comfortable</option>
+          <option value="maroon-elegance">Maroon Elegance</option>
+          <option value="forest-harmony">Forest Harmony</option>
+          <option value="mocha-serenity">Mocha Serenity</option>
+        </select>
+
+        <label for="mode-select">Mode tampilan</label>
+        <select id="mode-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System</option>
+        </select>
+      </div>
+    </details>
   </header>
+
   <main id="main">
-    <section class="hero" id="home" aria-labelledby="hero-title"><p class="eyebrow">ALBION ONLINE · COMMUNITY TOOL</p><h1 id="hero-title">Rencanakan produksi.<br><span>Hitung dengan yakin.</span></h1><p class="hero-copy">Kalkulator crafting dan refining gratis dengan harga dan biaya manual. Masukkan resep serta RRR yang terlihat di game untuk mendapat rincian estimasi yang bisa diperiksa.</p><a class="button primary" href="#calculator">Mulai menghitung <span aria-hidden="true">↓</span></a><div class="hero-note"><span class="status-dot" aria-hidden="true"></span>Tanpa harga pasar otomatis. Tanpa fitur berbayar.</div></section>
+    <section class="hero" id="home" aria-labelledby="hero-title">
+      <div class="hero-copy-wrap">
+        <p class="eyebrow">ALBION ONLINE · COMMUNITY TOOL</p>
+        <h1 id="hero-title">Rencanakan produksi.<br><span>Hitung dengan yakin.</span></h1>
+        <p class="hero-copy">Kalkulator crafting dan refining gratis dengan input manual, transparansi penuh, dan fokus pada keputusan yang masuk akal.</p>
+
+        <div class="hero-actions">
+          <a class="button primary" href="#calculator">Mulai menghitung <span aria-hidden="true">↓</span></a>
+          <button type="button" class="button secondary" data-preset-apply="starter">Contoh cepat</button>
+        </div>
+
+        <div class="hero-meta" aria-label="informasi penting">
+          <div class="meta-pill"><span class="status-dot" aria-hidden="true"></span>Input manual</div>
+          <div class="meta-pill">Tanpa API</div>
+          <div class="meta-pill">Hitung transparan</div>
+        </div>
+      </div>
+
+      <div class="hero-panel" aria-label="ringkasan cepat">
+        <div class="mini-stat">
+          <span class="mini-label">Mode</span>
+          <strong>Manual-aware</strong>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-label">RRR</span>
+          <strong>Masuk input user</strong>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-label">Biaya</span>
+          <strong>Stasiun + fokus + pajak</strong>
+        </div>
+      </div>
+    </section>
+
     <section class="section calculator-section" id="calculator" aria-labelledby="calculator-title">
-      <div class="section-heading"><div><p class="eyebrow">KALKULATOR</p><h2 id="calculator-title">Hitung produksi</h2></div><p>Harga dan biaya tetap manual. Pilih model pengembalian bahan; asumsi pembulatan ditampilkan bersama hasil.</p></div>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">KALKULATOR</p>
+          <h2 id="calculator-title">Hitung produksi</h2>
+        </div>
+        <p>Semua angka yang belum diverifikasi di game tetap ditentukan oleh pengguna agar tidak ada klaim data yang terlalu cepat.</p>
+      </div>
+
       <div class="calculator-grid">
-        <form class="panel form-panel" id="calculator-form" novalidate>
-          <fieldset class="process-switch"><legend>Jenis produksi</legend><label><input type="radio" name="process" value="refining" checked><span>Refining</span></label><label><input type="radio" name="process" value="crafting"><span>Crafting</span></label></fieldset>
-          <div class="field-grid">
-            <div class="field"><label for="item-name">Nama item / hasil</label><input id="item-name" name="itemName" type="text" placeholder="Nama hasil produksi" autocomplete="off"></div>
-            <div class="field"><label for="output-quantity">Hasil per batch</label><input id="output-quantity" name="outputQuantity" type="number" min="1" step="1" value="1" inputmode="numeric" required></div>
-            <div class="field"><label for="batches">Jumlah batch</label><input id="batches" name="batches" type="number" min="1" step="1" value="1" inputmode="numeric" required></div>
-            <div class="field"><label for="city">Kota produksi (opsional)</label><select id="city" name="city"><option value="">Pilih kota</option><option>Bridgewatch</option><option>Fort Sterling</option><option>Lymhurst</option><option>Martlock</option><option>Thetford</option><option>Caerleon</option><option>Brecilien</option></select></div>
-            <div class="field"><label for="return-rate">RRR dari game (%)</label><input id="return-rate" name="returnRate" type="number" min="0" max="100" step="0.01" value="0" inputmode="decimal" required><small>Masukkan total RRR yang game tampilkan untuk kondisi produksimu.</small></div>
-            <div class="field"><label for="return-model">Model pengembalian</label><select id="return-model" name="returnModel"><option value="expected">Ekspektasi pecahan (rata-rata teoritis)</option><option value="floor-batch">Simulasi floor per batch</option></select><small>Simulasi floor bukan klaim aturan pembulatan aktual game.</small></div>
-            <div class="field"><label for="station-fee">Biaya stasiun per batch</label><input id="station-fee" name="stationFee" type="number" min="0" step="any" value="0" inputmode="decimal" required><small>Masukkan silver aktual/estimasi untuk satu batch.</small></div>
-            <div class="field"><label for="focus-points">Focus point per batch (opsional)</label><input id="focus-points" name="focusPoints" type="number" min="0" step="any" value="0" inputmode="decimal"></div>
-            <div class="field"><label for="focus-value">Biaya peluang per focus point</label><input id="focus-value" name="focusValue" type="number" min="0" step="any" value="0" inputmode="decimal"><small>Isi nilai silver per point jika ingin memasukkannya sebagai biaya.</small></div>
-            <div class="field"><label for="output-price">Harga jual per hasil</label><input id="output-price" name="outputPrice" type="number" min="0" step="any" value="0" inputmode="decimal" required></div>
-            <div class="field"><label for="market-tax">Pajak penjualan (%)</label><input id="market-tax" name="marketTax" type="number" min="0" max="100" step="0.01" value="0" inputmode="decimal"><small>Isi tarif sesuai status dan UI game milikmu.</small></div>
-            <div class="field"><label for="sell-order-fee">Biaya setup sell order (%)</label><input id="sell-order-fee" name="sellOrderFee" type="number" min="0" max="100" step="0.01" value="0" inputmode="decimal"><small>Pisahkan dari pajak; isi 0 jika tidak berlaku.</small></div>
+        <form class="panel form-panel" id="calculator-form">
+          <div class="preset-stack" aria-label="Preset cepat">
+            <span class="eyebrow small">Contoh cepat</span>
+            <div class="preset-buttons">
+              <button type="button" class="preset-button" data-preset="starter">Starter</button>
+              <button type="button" class="preset-button" data-preset="refining-heavy">Refining</button>
+              <button type="button" class="preset-button" data-preset="crafting-economy">Crafting</button>
+            </div>
           </div>
-          <div class="materials-heading"><div><h3>Bahan resep</h3><p>Jumlah per batch, harga beli, dan status return.</p></div><button class="button secondary small" type="button" id="add-material">+ Tambah bahan</button></div>
-          <div class="materials-list" id="materials-list"></div>
-          <div class="form-actions"><button class="button primary calculate-button" type="submit">Hitung estimasi</button><button class="button secondary reset-button" type="reset" id="reset-calculator">Reset</button></div>
-          <p class="validation-message" id="validation-message" role="alert" hidden></p>
-          <p class="form-disclaimer">Kalkulator tidak mengambil harga atau bonus otomatis. Hasilnya estimasi berdasarkan input dan model pembulatan pilihanmu, bukan jaminan hasil in-game.</p>
+
+          <fieldset class="process-switch">
+            <legend>Jenis produksi</legend>
+            <label><input type="radio" name="process" value="refining" checked><span>Refining</span></label>
+            <label><input type="radio" name="process" value="crafting"><span>Crafting</span></label>
+          </fieldset>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="item-name">Nama item / hasil</label>
+              <input id="item-name" name="itemName" type="text" placeholder="Contoh: Titanium Steel Bar" autocomplete="off">
+            </div>
+
+            <div class="field">
+              <label for="city">Kota / lokasi</label>
+              <input id="city" name="city" type="text" placeholder="Contoh: Martlock" autocomplete="off">
+            </div>
+
+            <div class="field">
+              <label for="output-quantity">Hasil per batch</label>
+              <input id="output-quantity" name="outputQuantity" type="number" min="0" step="any" value="1" inputmode="decimal">
+            </div>
+
+            <div class="field">
+              <label for="batches">Jumlah batch</label>
+              <input id="batches" name="batches" type="number" min="1" step="1" value="1" inputmode="decimal">
+            </div>
+
+            <div class="field">
+              <label for="return-rate">RRR (%)</label>
+              <input id="return-rate" name="returnRate" type="number" min="0" max="100" step="0.01" value="25" inputmode="decimal">
+            </div>
+
+            <div class="field">
+              <label for="return-model">Model return</label>
+              <select id="return-model" name="returnModel">
+                <option value="expected">Ekspektasi pecahan</option>
+                <option value="floor-batch">Floor per batch</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="output-price">Harga jual / unit</label>
+              <input id="output-price" name="outputPrice" type="number" min="0" step="any" value="0" inputmode="decimal">
+            </div>
+
+            <div class="field">
+              <label for="station-fee">Biaya stasiun / batch</label>
+              <input id="station-fee" name="stationFee" type="number" min="0" step="any" value="0" inputmode="decimal">
+            </div>
+
+            <div class="field">
+              <label for="market-tax">Pajak penjualan (%)</label>
+              <input id="market-tax" name="marketTax" type="number" min="0" max="100" step="0.01" value="0" inputmode="decimal">
+            </div>
+
+            <div class="field">
+              <label for="sell-order-fee">Biaya sell order (%)</label>
+              <input id="sell-order-fee" name="sellOrderFee" type="number" min="0" max="100" step="0.01" value="0" inputmode="decimal">
+            </div>
+
+            <div class="field">
+              <label for="focus-points">Focus point / batch</label>
+              <input id="focus-points" name="focusPoints" type="number" min="0" step="any" value="0" inputmode="decimal">
+            </div>
+
+            <div class="field">
+              <label for="focus-value">Nilai fokus / point</label>
+              <input id="focus-value" name="focusValue" type="number" min="0" step="any" value="0" inputmode="decimal">
+            </div>
+          </div>
+
+          <div class="materials-heading">
+            <div>
+              <h3>Bahan resep</h3>
+              <p>Catatan: bahan yang tidak dapat return bisa dimatikan.</p>
+            </div>
+            <button type="button" class="button secondary small" id="add-material">+ Bahan</button>
+          </div>
+
+          <div id="materials-list" class="materials-list" aria-live="polite"></div>
+
+          <div class="form-actions">
+            <button type="submit" class="button primary calculate-button">Hitung estimasi</button>
+            <button type="button" class="button secondary reset-button" id="reset-calculator">Reset</button>
+          </div>
+
+          <div id="validation-message" class="validation-message" hidden aria-live="polite"></div>
+          <p class="form-disclaimer">Kalkulator ini tidak mengklaim data game exact; semua angka hasil dan biaya tetap bergantung pada input yang Anda masukkan.</p>
         </form>
-        <aside class="panel result-panel" aria-labelledby="result-title" aria-live="polite"><div class="result-heading"><div><p class="eyebrow">RINCIAN HASIL</p><h3 id="result-title">Hasil kalkulasi</h3></div><button class="button secondary small" id="copy-results" type="button" disabled>Salin ringkasan</button></div><p class="empty-state" id="empty-state">Isi bahan resep, harga, dan biaya, lalu pilih <strong>Hitung estimasi</strong>.</p>
-          <div id="results" hidden><p class="result-item-name" id="result-item-name"></p><dl class="result-list"><div><dt>Jumlah hasil</dt><dd id="result-quantity">—</dd></div><div><dt>Nilai bahan kotor</dt><dd id="result-gross-material">—</dd></div><div><dt>Nilai bahan kembali</dt><dd id="result-returned-material">—</dd></div><div><dt>Biaya bahan dikonsumsi</dt><dd id="result-material-cost">—</dd></div><div><dt>Biaya stasiun</dt><dd id="result-station-cost">—</dd></div><div><dt>Biaya peluang fokus</dt><dd id="result-focus-cost">—</dd></div><div><dt>Pendapatan kotor</dt><dd id="result-gross-revenue">—</dd></div><div><dt>Pajak penjualan</dt><dd id="result-market-tax">—</dd></div><div><dt>Biaya sell order</dt><dd id="result-sell-fee">—</dd></div><div><dt>Pendapatan bersih</dt><dd id="result-revenue">—</dd></div></dl>
-            <div class="table-wrap"><table class="materials-breakdown"><caption>Rincian bahan untuk seluruh batch</caption><thead><tr><th scope="col">Bahan</th><th scope="col">Awal</th><th scope="col">Kembali</th><th scope="col">Dikonsumsi</th><th scope="col">Biaya</th></tr></thead><tbody id="result-material-rows"></tbody></table></div>
-            <div class="profit-box"><span>Profit / (rugi) estimasi</span><strong id="result-profit">—</strong></div><p class="result-metric" id="result-margin"></p><p class="formula-note" id="formula-note"></p><p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
+
+        <aside class="panel result-panel" id="results" hidden>
+          <div class="result-heading">
+            <div>
+              <p class="eyebrow">HASIL</p>
+              <h3>Estimasi produksi</h3>
+            </div>
+            <button type="button" class="button secondary small" id="copy-results" disabled>Salin ringkasan</button>
+          </div>
+
+          <div id="empty-state" class="empty-state">Isi bahan resep, harga, dan biaya, lalu pilih Hitung estimasi.</div>
+
+          <div class="result-body">
+            <div id="result-item-name" class="result-item-name">Item belum dipilih</div>
+
+            <dl class="result-list" aria-live="polite">
+              <div><dt>Jumlah hasil</dt><dd id="result-quantity">0</dd></div>
+              <div><dt>Nilai bahan kotor</dt><dd id="result-gross-material">0</dd></div>
+              <div><dt>Nilai bahan kembali</dt><dd id="result-returned-material">0</dd></div>
+              <div><dt>Biaya bahan</dt><dd id="result-material-cost">0</dd></div>
+              <div><dt>Biaya stasiun</dt><dd id="result-station-cost">0</dd></div>
+              <div><dt>Biaya fokus</dt><dd id="result-focus-cost">0</dd></div>
+              <div><dt>Pendapatan kotor</dt><dd id="result-gross-revenue">0</dd></div>
+              <div><dt>Pajak penjualan</dt><dd id="result-market-tax">0</dd></div>
+              <div><dt>Biaya sell order</dt><dd id="result-sell-fee">0</dd></div>
+              <div><dt>Pendapatan bersih</dt><dd id="result-revenue">0</dd></div>
+            </dl>
+
+            <div class="profit-box">
+              <span>Estimasi profit</span>
+              <strong id="result-profit">0</strong>
+            </div>
+
+            <p id="result-margin" class="result-metric">Margin belum dihitung.</p>
+            <p id="formula-note" class="formula-note">Rumus penggunaan akan muncul di sini.</p>
+
+            <div class="table-wrap">
+              <table class="materials-breakdown">
+                <caption>Rincian bahan</caption>
+                <thead>
+                  <tr>
+                    <th>Bahan</th>
+                    <th>Gross</th>
+                    <th>Return</th>
+                    <th>Dipakai</th>
+                    <th>Biaya</th>
+                  </tr>
+                </thead>
+                <tbody id="result-material-rows"></tbody>
+              </table>
+            </div>
+
+            <div id="copy-status" class="copy-status" aria-live="polite"></div>
           </div>
         </aside>
       </div>
     </section>
-    <section class="section city-section" id="city-bonuses" aria-labelledby="city-title"><div class="section-heading"><div><p class="eyebrow">PILIH LOKASI</p><h2 id="city-title">Bonus kota</h2></div><p>Masukkan RRR yang tampil di game; kalkulator tidak mengarang bonus kota atau menyimpulkan angka yang belum diverifikasi.</p></div><div class="notice" role="note"><span class="notice-icon" aria-hidden="true">i</span><div><strong>Rekomendasi kota otomatis belum diaktifkan.</strong><p>Informasi bonus dari panduan dan kalkulator komunitas yang ditemukan saling berbeda. Pemetaan kota akan ditambahkan setelah dicocokkan dengan tooltip dalam game dan sumber terpercaya.</p></div></div></section>
-    <section class="section how-section" id="about" aria-labelledby="how-title"><div class="section-heading"><div><p class="eyebrow">TRANSPARAN DARI AWAL</p><h2 id="how-title">Kamu pegang kendali</h2></div></div><div class="principles"><article><span>01</span><h3>Harga manual</h3><p>Masukkan harga beli dan jual pilihanmu. Tidak ada API harga yang berjalan di latar.</p></article><article><span>02</span><h3>Rincian, bukan tebakan</h3><p>Bahan returnable, model return, pajak, stasiun, dan biaya fokus terlihat terpisah.</p></article><article><span>03</span><h3>Gratis sepenuhnya</h3><p>Tidak ada langganan, batas kalkulasi berbayar, ataupun fitur yang dikunci.</p></article></div></section>
+
+    <section class="section" id="city-bonuses" aria-labelledby="city-bonuses-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">CATATAN</p>
+          <h2 id="city-bonuses-title">Tidak ada asumsi bonus kota otomatis</h2>
+        </div>
+      </div>
+
+      <div class="notice">
+        <div class="notice-icon" aria-hidden="true">!</div>
+        <div>
+          <strong>Bonus kota, RRR, dan rumus pengembalian tetap diinput pengguna.</strong>
+          <p>Ini mencegah website menebak angka yang belum diverifikasi secara konsisten dari sumber resmi atau wiki yang tertutup.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about" aria-labelledby="about-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">PRINSIP</p>
+          <h2 id="about-title">Cara kerja kalkulator</h2>
+        </div>
+      </div>
+
+      <div class="principles">
+        <article>
+          <span>01</span>
+          <h3>Input manual</h3>
+          <p>Semua harga, potensi return, pajak, dan biaya dibuat jelas dan bisa dilihat satu per satu.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Rumus transparan</h3>
+          <p>Nilai bahan kotor, return, konsumsi, biaya stasiun, fokus, dan pendapatan bersih ditampilkan dengan jelas.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Keputusan user</h3>
+          <p>Website membantu membandingkan skenario, bukan mengganti kesadaran pemain terhadap perubahan data game.</p>
+        </article>
+      </div>
+    </section>
   </main>
-  <footer class="footer"><a class="brand" href="#home"><span class="brand-mark" aria-hidden="true">A</span><span>Albion <strong>Workshop</strong></span></a><p>Fan-made tool untuk Albion Online. Tidak berafiliasi dengan Sandbox Interactive.</p><a href="#home">Kembali ke atas ↑</a></footer>
+
+  <footer class="footer">
+    <p>Albion Workshop · kalkulator manual untuk crafting dan refining.</p>
+    <a href="#home">Kembali ke atas</a>
+  </footer>
 </body>
 </html>
