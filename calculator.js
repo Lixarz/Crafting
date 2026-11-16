@@ -14,13 +14,15 @@
     const outputPerBatch = finiteNonNegative(input.outputPerBatch, 'Jumlah hasil per batch');
     const batches = finiteNonNegative(input.batches, 'Jumlah batch');
     const returnRatePercent = finiteNonNegative(input.returnRatePercent, 'RRR');
-    const stationFeePerBatch = finiteNonNegative(input.stationFeePerBatch || 0, 'Biaya stasiun');
-    const focusPointsPerBatch = finiteNonNegative(input.focusPointsPerBatch || 0, 'Focus point');
-    const focusValuePerPoint = finiteNonNegative(input.focusValuePerPoint || 0, 'Nilai biaya fokus');
+    const stationFeePerBatch = finiteNonNegative(input.stationFeePerBatch ?? 0, 'Biaya stasiun');
+    const focusPointsPerBatch = finiteNonNegative(input.focusPointsPerBatch ?? 0, 'Focus point');
+    const focusValuePerPoint = finiteNonNegative(input.focusValuePerPoint ?? 0, 'Nilai biaya fokus');
     const outputUnitPrice = finiteNonNegative(input.outputUnitPrice, 'Harga jual');
-    const marketTaxPercent = finiteNonNegative(input.marketTaxPercent || 0, 'Pajak penjualan');
-    const sellOrderFeePercent = finiteNonNegative(input.sellOrderFeePercent || 0, 'Biaya sell order');
-    if (outputPerBatch <= 0 || batches <= 0) throw new Error('Jumlah hasil dan jumlah batch harus lebih dari 0.');
+    const marketTaxPercent = finiteNonNegative(input.marketTaxPercent ?? 0, 'Pajak penjualan');
+    const sellOrderFeePercent = finiteNonNegative(input.sellOrderFeePercent ?? 0, 'Biaya sell order');
+    if (!Number.isInteger(outputPerBatch) || !Number.isInteger(batches) || outputPerBatch <= 0 || batches <= 0) {
+      throw new Error('Jumlah hasil dan batch harus berupa bilangan bulat lebih dari 0.');
+    }
     if (returnRatePercent > 100 || marketTaxPercent > 100 || sellOrderFeePercent > 100) throw new Error('Persentase tidak boleh lebih dari 100%.');
     if (!['expected', 'floor-batch'].includes(input.returnModel)) throw new Error('Pilih model pengembalian bahan yang valid.');
     if (!Array.isArray(input.materials) || input.materials.length === 0) throw new Error('Tambahkan setidaknya satu bahan resep.');
@@ -44,7 +46,7 @@
         consumedValue: consumedQuantity * unitPrice
       };
     });
-    const sum = (field) => materialDetails.reduce((total, item) => total + item[field], 0);
+    const sum = field => materialDetails.reduce((total, item) => total + item[field], 0);
     const grossMaterialQuantity = sum('grossQuantity');
     const returnedMaterialQuantity = sum('returnedQuantity');
     const grossMaterialValue = sum('grossValue');

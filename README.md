@@ -6,20 +6,20 @@ Website statis gratis untuk kalkulator crafting dan refining Albion Online. Harg
 
 Buka `index.html` di browser atau host folder ini sebagai website statis. Tidak ada dependency runtime. Jalankan test logika dengan Node.js: `npm test`.
 
-## Model kalkulasi
+## Kalkulator
 
-- Tiap bahan memiliki jumlah resep per batch, harga unit, dan pilihan apakah bahan itu returnable. Bahan yang ditandai tidak dapat return tidak dikurangi RRR.
-- RRR adalah persentase total yang pengguna baca dari game, bukan dihitung dari asumsi bonus kota/fokus.
-- Model **Ekspektasi pecahan** menghitung return teoritis sebagai jumlah bahan × RRR; cocok untuk estimasi rata-rata, bukan jumlah item pasti.
-- Model **Bulatkan ke bawah per batch** mensimulasikan floor(quantity per batch × RRR) pada setiap batch. Ini sengaja diberi label simulasi karena perilaku pembulatan spesifik game perlu diuji pada recipe/batch aktual.
-- Biaya bahan = nilai bahan awal − nilai bahan kembali. Biaya stasiun dimasukkan sebagai silver per batch aktual/estimasi pengguna.
-- Pendapatan kotor = hasil × harga jual. Pajak dan biaya sell order dimasukkan manual sebagai persentase terpisah; profit = pendapatan bersih − bahan yang dikonsumsi − stasiun − opportunity cost fokus opsional.
-- Focus point dan nilai per point opsional. Ini membantu menghitung opportunity cost, tetapi tool tidak menebak focus efficiency/mastery.
-- Belum memodelkan recipe database, item quality, journal return, crafting quality, travel/transport, nutrition formula, usage fee otomatis atau bonus kota. Angka-angka itu tidak boleh dianggap inbegrepen secara otomatis.
+- Input crafting/refining, jumlah hasil, batch, kota (label saja), harga hasil, harga bahan, dan biaya manual.
+- Tiap bahan memiliki jumlah resep per batch, harga unit, dan pilihan returnable. Bahan yang ditandai tidak mendapat pengembalian RRR.
+- RRR adalah persentase total dari UI game yang pengguna masukkan. Situs tidak menebak bonus kota, fokus, atau bonus lain.
+- **Ekspektasi pecahan** menunjukkan return matematis rata-rata (quantity × RRR); ini bukan jumlah unit pasti.
+- **Simulasi floor per batch** membulatkan quantity × RRR ke bawah per input bahan dan per batch. Ini hanya model simulasi dan belum diklaim sama dengan urutan pembulatan game.
+- Biaya bahan yang dikonsumsi, biaya stasiun, biaya peluang fokus (opsional), pendapatan kotor, pajak penjualan, biaya setup sell order, pendapatan bersih, margin, ROI, dan profit ditampilkan terpisah.
+- Tabel rincian bahan dan tombol salin ringkasan disediakan. Harga/recipe tidak tersimpan atau diambil otomatis.
+- Belum ada database resep, jurnal, kualitas item, formula biaya fokus, biaya transport, atau rekomendasi bonus kota. Biaya stasiun dan pajak bersifat manual karena konteks/aturan akun dapat beragam.
 
-## Catatan akurasi game
+## Batas akurasi game
 
-Panduan dan kalkulator komunitas yang ditemukan menyepakati pendekatan umum: input harga, recipe, RRR, lalu bedakan bahan kembali dan biaya stasiun/pajak. Tetapi hasil pencarian untuk angka bonus kota, rumus RRR dan pembulatan tidak konsisten satu sama lain. Karena itu nilai bonus/rumus fokus tidak di-hardcode. Gunakan RRR yang terlihat pada UI game dan cocokkan estimasi pembulatan dengan beberapa percobaan dalam game sebelum menganggap hasil sebagai nilai tepat.
+Kalkulator memberi aritmetika yang transparan untuk data input, tetapi belum dapat mengklaim hasil game-exact. Sumber online yang ditinjau tidak konsisten pada angka bonus kota, formula RRR, pajak/fee, dan pembulatan. Untuk itu, masukkan RRR yang ditunjukkan game, tandai komponen resep yang tidak returnable, dan cocokkan simulasi dengan hasil dalam game. Kita akan menambah data bawaan hanya setelah diverifikasi dengan bukti game dan sumber yang bisa dirujuk.
 
 ## Tema dan aksesibilitas
 
