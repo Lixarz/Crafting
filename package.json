@@ -1,0 +1,7 @@
+{
+  "name": "albion-workshop-calculator",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Manual-input Albion Online crafting/refining calculator",
+  "scripts": { "test": "node --test" }
+}
