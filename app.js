@@ -42,30 +42,50 @@
     row.querySelector('.material-quantity').value = defaults.quantity ?? 0;
     row.querySelector('.material-price').value = defaults.price ?? 0;
     row.querySelector('.material-returnable').checked = defaults.returnable !== false;
-    row.querySelector('.remove-material').addEventListener('click', () => row.remove());
+    row.querySelector('.remove-material').addEventListener('click', () => {
+      row.remove();
+      invalidateResults();
+    });
     materialsList.append(row);
   }
-  function resetResult() {
-    document.querySelector('#empty-state').hidden = false;
+  function resetResult(message = 'Isi bahan resep, harga, dan biaya, lalu pilih Hitung estimasi.') {
+    const empty = document.querySelector('#empty-state');
+    empty.textContent = message;
+    empty.hidden = false;
     document.querySelector('#results').hidden = true;
     document.querySelector('#copy-results').disabled = true;
     document.querySelector('#copy-status').textContent = '';
     latestSummary = '';
+  }
+  function invalidateResults() {
+    if (!document.querySelector('#results').hidden) {
+      resetResult('Input berubah. Hitung ulang untuk melihat hasil terbaru.');
+    }
   }
   function resetMaterialRows() {
     materialsList.replaceChildren();
     materialId = 0;
     addMaterialRow();
   }
-  document.querySelector('#add-material').addEventListener('click', () => addMaterialRow());
+  document.querySelector('#add-material').addEventListener('click', () => {
+    addMaterialRow();
+    invalidateResults();
+  });
   document.querySelector('#reset-calculator').addEventListener('click', () => {
-    window.setTimeout(() => { resetMaterialRows(); resetResult(); document.querySelector('#validation-message').hidden = true; }, 0);
+    window.setTimeout(() => {
+      resetMaterialRows();
+      resetResult();
+      document.querySelector('#validation-message').hidden = true;
+    }, 0);
   });
   resetMaterialRows();
 
   const form = document.querySelector('#calculator-form');
   const validation = document.querySelector('#validation-message');
   const setText = (selector, value) => { document.querySelector(selector).textContent = value; };
+  // Avoid showing stale profit if any calculator input changes after a calculation.
+  form.addEventListener('input', invalidateResults);
+  form.addEventListener('change', invalidateResults);
   form.addEventListener('submit', event => {
     event.preventDefault();
     validation.hidden = true;
@@ -106,7 +126,6 @@
       return;
     }
     const city = form.elements.city.value || 'Kota belum dipilih';
-    setText('#empty-state', 'Kalkulasi berhasil.');
     document.querySelector('#empty-state').hidden = true;
     document.querySelector('#results').hidden = false;
     setText('#result-item-name', `${itemName} · ${city}`);
@@ -136,7 +155,7 @@
       bodyRows.append(tr);
     }
     const modelDescription = result.returnModel === 'floor-batch' ? 'simulasi floor per bahan per batch' : 'ekspektasi pecahan (rata-rata teoritis)';
-    const note = `RRR input ${money.format(result.returnRatePercent)}%; model ${modelDescription}. Bahan non-returnable tidak menerima return. Biaya material = nilai bahan awal − nilai bahan kembali; pendapatan bersih = kotor − pajak − biaya sell order. Produksi = bahan dikonsumsi + stasiun + biaya peluang fokus. Verifikasi aturan pembulatan dan biaya dalam game.`;
+    const note = `RRR input ${money.format(result.returnRatePercent)}%; model ${modelDescription}. Bahan non-returnable tidak menerima return. Biaya material = nilai bahan awal − nilai bahan kembali; pendapatan bersih = kotor − pajak − biaya sell order. Produksi = bahan dikonsumsi + stasiun + biaya peluang fokus. Pembulatan pajak/fee game tidak dimodelkan; verifikasi biaya dan return dalam game.`;
     setText('#formula-note', note);
     latestSummary = `${itemName} (${process}) — ${city}\nHasil: ${quantityFormat.format(result.totalOutput)}\nBahan kotor: ${money.format(result.grossMaterialValue)} silver\nNilai bahan kembali: ${money.format(result.returnedMaterialValue)} silver\nBiaya bahan dikonsumsi: ${money.format(result.materialCost)} silver\nBiaya stasiun: ${money.format(result.stationCost)} silver\nBiaya fokus: ${money.format(result.focusCost)} silver\nPendapatan bersih: ${money.format(result.netRevenue)} silver\nProfit estimasi: ${money.format(result.profit)} silver\nRRR: ${money.format(result.returnRatePercent)}% (${modelDescription})`;
     document.querySelector('#copy-results').disabled = false;

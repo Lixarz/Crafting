@@ -6,21 +6,27 @@ Website statis gratis untuk kalkulator crafting dan refining Albion Online. Harg
 
 Buka `index.html` di browser atau host folder ini sebagai website statis. Tidak ada dependency runtime. Jalankan test logika dengan Node.js: `npm test`.
 
-## Kalkulator
+## Kalkulator dan cara pakai
 
-- Input crafting/refining, jumlah hasil, batch, kota (label saja), harga hasil, harga bahan, dan biaya manual.
-- Tiap bahan memiliki jumlah resep per batch, harga unit, dan pilihan returnable. Bahan yang ditandai tidak mendapat pengembalian RRR.
-- RRR adalah persentase total dari UI game yang pengguna masukkan. Situs tidak menebak bonus kota, fokus, atau bonus lain.
-- **Ekspektasi pecahan** menunjukkan return matematis rata-rata (quantity × RRR); ini bukan jumlah unit pasti.
-- **Simulasi floor per batch** membulatkan quantity × RRR ke bawah per input bahan dan per batch. Ini hanya model simulasi dan belum diklaim sama dengan urutan pembulatan game.
-- Biaya bahan yang dikonsumsi, biaya stasiun, biaya peluang fokus (opsional), pendapatan kotor, pajak penjualan, biaya setup sell order, pendapatan bersih, margin, ROI, dan profit ditampilkan terpisah.
-- Tabel rincian bahan dan tombol salin ringkasan disediakan. Harga/recipe tidak tersimpan atau diambil otomatis.
-- Belum ada database resep, jurnal, kualitas item, formula biaya fokus, biaya transport, atau rekomendasi bonus kota. Biaya stasiun dan pajak bersifat manual karena konteks/aturan akun dapat beragam.
+1. Pilih Crafting atau Refining, lalu isi jumlah output dan batch.
+2. Tambahkan semua bahan resep. Isi kuantitas per batch dan harga per unit; matikan `Dapat return` untuk bahan yang tidak dikembalikan.
+3. Masukkan RRR dari UI game, harga jual, dan biaya yang ingin dihitung. Biaya fokus adalah biaya peluang opsional; isi nilai per point hanya jika ingin memperhitungkannya.
+4. Pilih model return dan hitung. Bila input diubah sesudah hasil muncul, hasil lama disembunyikan hingga dihitung ulang.
 
-## Batas akurasi game
+### Asumsi model
 
-Kalkulator memberi aritmetika yang transparan untuk data input, tetapi belum dapat mengklaim hasil game-exact. Sumber online yang ditinjau tidak konsisten pada angka bonus kota, formula RRR, pajak/fee, dan pembulatan. Untuk itu, masukkan RRR yang ditunjukkan game, tandai komponen resep yang tidak returnable, dan cocokkan simulasi dengan hasil dalam game. Kita akan menambah data bawaan hanya setelah diverifikasi dengan bukti game dan sumber yang bisa dirujuk.
+- RRR adalah persentase total yang pengguna baca dari game, bukan dihitung dari asumsi bonus kota atau mastery.
+- **Ekspektasi pecahan** menunjukkan rata-rata matematis `kuantitas × RRR`; tidak menyatakan jumlah unit yang pasti diperoleh pada satu produksi.
+- **Simulasi floor per batch** membulatkan ke bawah `kuantitas × RRR` untuk setiap baris bahan pada setiap batch. Ini hanya skenario what-if, bukan klaim pembulatan aktual game.
+- Biaya bahan = nilai seluruh bahan awal dikurangi nilai bahan yang kembali.
+- Pendapatan bersih = pendapatan kotor dikurangi persentase pajak dan biaya sell order yang pengguna masukkan. Pengguna bertanggung jawab memastikan tarif tersebut berlaku dan tidak memasukkan komponen yang sama dua kali.
+- Profit = pendapatan bersih − bahan yang dikonsumsi − biaya stasiun − biaya peluang fokus opsional.
+- Aritmetika menggunakan JavaScript Number; pajak/fee silver tidak dibulatkan menurut aturan game. Tidak ada recipe database, formula biaya fokus, journal return, item quality, transport, atau rekomendasi bonus kota.
+
+## Akurasi dan verifikasi
+
+Program melakukan aritmetika transparan berdasarkan input, tetapi belum mengklaim hasil game-exact. Informasi online yang ditinjau tidak konsisten mengenai bonus kota, RRR, pajak, dan cara rounding. Gunakan nilai yang ditampilkan game dan bandingkan skenario rounding dengan transaksi uji. Fitur otomatis hanya akan ditambahkan setelah datanya dapat diverifikasi terhadap bukti dalam game dan sumber yang bisa dirujuk.
 
 ## Tema dan aksesibilitas
 
-Enam palet (Modern Minimalist, Albion Inspired, Soft & Comfortable, Maroon Elegance, Forest Harmony, Mocha Serenity) masing-masing bisa dipadukan dengan Light, Dark, atau System. Pilihan independen dan hanya preferensi tema disimpan di `localStorage`; tema tidak mengakses data kalkulator. Interface menyediakan semantic labels, keyboard focus indicator, skip link, reduced motion, dan token warna konsisten.
+Enam palet (Modern Minimalist, Albion Inspired, Soft & Comfortable, Maroon Elegance, Forest Harmony, Mocha Serenity) masing-masing bisa dipadukan dengan Light, Dark, atau System. Pilihan independen dan hanya preferensi tema disimpan di `localStorage`; tema tidak mengakses data kalkulator. Interface menyediakan semantic labels, keyboard focus indicator, skip link, reduced motion, serta token warna konsisten.

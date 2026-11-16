@@ -30,12 +30,12 @@ test('accounts for opportunity cost of focus points', () => {
   const result = calculate({ ...base, focusPointsPerBatch: 100, focusValuePerPoint: 3, batches: 2 });
   assert.equal(result.focusPoints, 200); assert.equal(result.focusCost, 600); assert.equal(result.profit, -620);
 });
-test('rejects invalid rate and zero production size', () => {
+test('rejects invalid rate and zero or fractional production size', () => {
   assert.throws(() => calculate({ ...base, returnRatePercent: 101 }), /tidak boleh lebih/);
   assert.throws(() => calculate({ ...base, batches: 0 }), /bilangan bulat lebih dari 0/);
   assert.throws(() => calculate({ ...base, batches: 1.5 }), /bilangan bulat lebih dari 0/);
 });
-test('keeps exact per-material returnable flags and values', () => {
+test('keeps returnable flags separate per ingredient', () => {
   const result = calculate({ ...base, returnRatePercent: 50, materials: [
     { name: 'resource', quantityPerBatch: 8, unitPrice: 5, returnable: true },
     { name: 'artifact', quantityPerBatch: 2, unitPrice: 100, returnable: false }
@@ -43,7 +43,12 @@ test('keeps exact per-material returnable flags and values', () => {
   assert.deepEqual(result.materialDetails.map(item => item.returnedQuantity), [4, 0]);
   assert.equal(result.grossMaterialValue, 240); assert.equal(result.returnedMaterialValue, 20); assert.equal(result.materialCost, 220);
 });
-test('rejects NaN and negative material values', () => {
+test('rejects NaN, infinity and negative material values', () => {
   assert.throws(() => calculate({ ...base, outputUnitPrice: NaN }), /angka nol atau lebih/);
+  assert.throws(() => calculate({ ...base, outputUnitPrice: Infinity }), /angka nol atau lebih/);
   assert.throws(() => calculate({ ...base, materials: [{ ...base.materials[0], unitPrice: -1 }] }), /angka nol atau lebih/);
+});
+test('calculates zero-fee and zero-revenue cases without division errors', () => {
+  const result = calculate({ ...base });
+  assert.equal(result.netRevenue, 0); assert.equal(result.profit, -20);
 });
